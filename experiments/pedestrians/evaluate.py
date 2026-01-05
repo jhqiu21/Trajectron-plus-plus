@@ -26,16 +26,17 @@ parser.add_argument("--data", help="full path to data file", type=str)
 parser.add_argument("--output_path", help="path to output csv file", type=str)
 parser.add_argument("--output_tag", help="name tag for output file", type=str)
 parser.add_argument("--node_type", help="node type to evaluate", type=str)
+parser.add_argument("--device", help="device to run evaluation on", type=str, default='cuda:0')
 args = parser.parse_args()
 
 
-def load_model(model_dir, env, ts=100):
-    model_registrar = ModelRegistrar(model_dir, 'cpu')
+def load_model(model_dir, env, ts=100, device='cuda:0'):
+    model_registrar = ModelRegistrar(model_dir, device)
     model_registrar.load_models(ts)
     with open(os.path.join(model_dir, 'config.json'), 'r') as config_json:
         hyperparams = json.load(config_json)
 
-    trajectron = Trajectron(model_registrar, hyperparams, None, 'cpu')
+    trajectron = Trajectron(model_registrar, hyperparams, None, device)
 
     trajectron.set_environment(env)
     trajectron.set_annealing_params()
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     with open(args.data, 'rb') as f:
         env = dill.load(f, encoding='latin1')
 
-    eval_stg, hyperparams = load_model(args.model, env, ts=args.checkpoint)
+    eval_stg, hyperparams = load_model(args.model, env, ts=args.checkpoint, device=args.device)
 
     if 'override_attention_radius' in hyperparams:
         for attention_radius_override in hyperparams['override_attention_radius']:
