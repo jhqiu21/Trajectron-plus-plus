@@ -27,6 +27,7 @@ parser.add_argument("--output_path", help="path to output csv file", type=str)
 parser.add_argument("--output_tag", help="name tag for output file", type=str)
 parser.add_argument("--node_type", help="node type to evaluate", type=str)
 parser.add_argument("--device", help="device to run evaluation on", type=str, default='cuda:0')
+parser.add_argument("--num_scenes", help="number of scenes to evaluate (default: all)", type=int, default=None)
 args = parser.parse_args()
 
 
@@ -55,6 +56,8 @@ if __name__ == "__main__":
             env.attention_radius[(node_type1, node_type2)] = float(attention_radius)
 
     scenes = env.scenes
+    if args.num_scenes is not None:
+        scenes = scenes[:args.num_scenes]
 
     print("-- Preparing Node Graph")
     for scene in tqdm(scenes):
